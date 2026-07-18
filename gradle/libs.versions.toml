@@ -1,7 +1,7 @@
 [versions]
-plugin-version = "2.0.11"
+plugin-version = "2.0.12"
 
-packetevents-version = "2.12.3-SNAPSHOT"
+packetevents-version = "2.13.0"
 cloud-version = "2.0.0"
 lombok-version = "1.18.42"
 adventure-version = "4.25.0"
@@ -43,7 +43,7 @@ packetevents-velocity = { group = "com.github.retrooper", name = "packetevents-v
 cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.0.0-beta.14" }
 
 ## Paper
-paper-api = { group = "io.papermc.paper", name = "paper-api", version = "1.21.8-R0.1-SNAPSHOT" }
+paper-api = { group = "io.papermc.paper", name = "paper-api", version = "26.1.2.build.+" }
 placeholderapi = { group = "me.clip", name = "placeholderapi", version = "2.11.6" }
 multilib = { group = "com.github.puregero", name = "multilib", version = "1.2.4" }
 packetevents-spigot = { group = "com.github.retrooper", name = "packetevents-spigot", version.ref = "packetevents-version" }

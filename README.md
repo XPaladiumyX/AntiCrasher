@@ -1,60 +1,96 @@
 <div align="center">
-    <h1>AntiCrasher</h1>
-    <div>
-        <a href="https://modrinth.com/plugin/anticrasher/versions">Download</a>
-        <span> | </span>
-        <a href="https://github.com/smashyalts/AntiCrasher/actions/workflows/ci.yml?query=branch%3Adev+is%3Asuccess">Dev Builds</a>
-        <span> | </span>
-        <a href="https://github.com/smashyalts/AntiCrasher/issues">Issues</a>
-        <span> | </span>
-        <a href="https://discord.gg/FJ3EVbA25d">Support</a>
-    </div>
+    <h1>AntiCrasher (SkyXNetwork Fork)</h1>
+    <p><em>Updated and adapted for Paper 26.1.2 - SkyXNetwork Edition</em></p>
 </div>
 
-## Available for Paper, Fabric, Velocity, and Folia
-A collection of crash, dupe, and miscellaneous exploit patches bundled into a single plugin/mod.
+---
 
-## Patches
-Please note that this plugin is mainly designed for older versions of Minecraft.\
-The following exploits are currently patched in this plugin/mod:
-- **Bundle Crash Exploit**
-- **Book Dupe Exploit**
-- **Negative Slot ID Crash Exploit**
-- **NBT Tab Completion Crash Exploit**
+> **This is NOT the official AntiCrasher plugin.** This is an unofficial fork maintained by SkyXNetwork, updated and
+> fixed to work with **Paper 26.1.2** (Minecraft 26.1.2). The original plugin is
+> by [CraftSupport](https://github.com/CraftSupport/AntiCrasher) / [smashyalts](https://github.com/smashyalts/AntiCrasher).
+> All credit for the original work goes to the original authors.
+
+---
+
+## What was changed
+
+The original AntiCrasher plugin was incompatible with Paper 26.1.2 due to a critical NPE (NullPointerException) in
+packetevents reflection (`NMS_ITEM_STACK_CLASS` null). This was caused by:
+
+1. **PacketEvents was shaded (bundled) into the plugin jar** - Paper 26.1+ dropped the internal plugin remapper, so
+   shaded packetevents could no longer resolve Mojang-mapped NMS classes at runtime.
+2. **Outdated PacketEvents version** - the plugin used `2.12.3-SNAPSHOT`, which lacked proper support for Paper 26.1.2's
+   Mojang-mapped environment.
+3. **Self-initialization of PacketEvents** - the plugin tried to build and initialize PacketEvents itself, conflicting
+   with the server's own PacketEvents instance.
+
+### Fixes applied
+
+| Change                                 | Description                                                                                                                                                       |
+|----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **PacketEvents upgraded to 2.13.0**    | Latest stable release with full MC 26.1.2+ and Mojang-mapping support                                                                                             |
+| **PacketEvents no longer shaded**      | Plugin now requires PacketEvents to be installed separately as a server plugin. This lets PacketEvents handle its own NMS reflection and Mojang-mapping correctly |
+| **Removed self-initialization**        | AntiCrasher no longer calls `PacketEvents.setAPI()` / `load()` / `init()` / `terminate()`. It uses the already-initialized API from the PacketEvents plugin       |
+| **Paper API updated to 26.1.2**        | Build dependency updated from `1.21.8-R0.1-SNAPSHOT` to `26.1.2.build.+`                                                                                          |
+| **Added `codemc-releases` repository** | PacketEvents stable releases are hosted here                                                                                                                      |
+| **Plugin dependency declared**         | `plugin.yml` now declares `depend: [packetevents]` to ensure proper load order                                                                                    |
+
+## Requirements
+
+- **Paper 26.1.2** (or compatible)
+- **PacketEvents plugin** - must be installed separately in your `plugins` folder. Download
+  from [Modrinth](https://modrinth.com/plugin/packetevents)
+  or [SpigotMC](https://www.spigotmc.org/resources/packetevents-api.80279/)
+- **Java 25** or newer
 
 ## Installation
-### Paper/Folia/Velocity
->[!NOTE]
->You only need to run this on the backends, or the proxy, **not on both**.
 
-1. Download the latest version from [Modrinth](https://modrinth.com/plugin/anticrasher/versions?l=spigot&l=purpur&l=paper&l=bukkit&l=folia) and place it in the `plugins` folder. Restart the server/proxy.
+1. Download and install the [PacketEvents plugin](https://modrinth.com/plugin/packetevents) into your server's `plugins`
+   folder.
+2. Download `AntiCrasher-bukkit-v2.0.12.jar` from the `libs/` folder (or build it yourself).
+3. Place the jar in your server's `plugins` folder.
+4. Restart the server.
 
-### Fabric
->[!WARNING]
-> PacketEvents Fabric is currently broken for online mode servers running 1.20.4-1.21.7.
-> There is no workaround for this issue at the moment. If you run a Velocity proxy, you can use the proxy version there instead.
+## Patches
 
-1. Download the latest version from [Modrinth](https://modrinth.com/plugin/anticrasher/versions?l=fabric) and place it in the `mods` folder.
-2. Install the latest [Fabric API](https://modrinth.com/mod/fabric-api/versions) for your server.
-3. Download the latest `fabric-build` package from [Axionize/packetevents](https://github.com/Axionize/packetevents/actions/workflows/gradle-publish.yml?query=branch%3Afix%2Ffabric-events+is%3Asuccess), and place it in the `mods` folder. Restart your server.
-   Use the [Official PacketEvents Builds](https://modrinth.com/plugin/packetevents) for 1.21.8+.
+The following exploits are patched:
+
+- **Bundle Crash Exploit** - prevents malicious SELECT_BUNDLE_ITEM packets with negative indices
+- **Book Dupe Exploit** - prevents EDIT_BOOK packets with oversized titles (>32 chars)
+- **Negative Slot ID Crash Exploit** - prevents CLICK_WINDOW packets with negative slot IDs (servers older than 1.20.5)
+- **NBT Tab Completion Crash Exploit** - prevents TAB_COMPLETE packets with excessively long inputs
 
 ## Commands
-- /ac reload - Reloads configs. `anticrasher.command.reload`
+
+- `/ac reload` - Reloads configs. Requires `anticrasher.command.reload` permission.
 
 ## Permissions
-- `anticrasher.alerts` - Receive alerts when a player attempts to run an exploit.
-- `anticrasher.bypass` - Bypass all AntiCrasher checks.
-- `anticrasher.updates` - Receive plugin update notifications
 
-## YourKit
-AntiCrasher is proud to be using [YourKit's profiling tools](https://www.yourkit.com).
+| Permission                   | Description                              | Default |
+|------------------------------|------------------------------------------|---------|
+| `anticrasher.command`        | Use the /anticrasher command             | op      |
+| `anticrasher.command.reload` | Reload configs                           | op      |
+| `anticrasher.alerts`         | Receive exploit detection alerts in chat | op      |
+| `anticrasher.bypass`         | Bypass all AntiCrasher checks            | op      |
+| `anticrasher.updates`        | Receive plugin update notifications      | op      |
 
-[YourKit](https://www.yourkit.com) supports open source projects with innovative and intelligent tools
-for monitoring and profiling Java and .NET applications.
+## Building from source
 
-YourKit is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>,
-<a href="https://www.yourkit.com/dotnet-profiler/">YourKit .NET Profiler</a>,
-and <a href="https://www.yourkit.com/youmonitor/">YourKit YouMonitor</a>.
+```bash
+# Requires Java 25+ and Gradle
+.\gradlew :bukkit:build
+```
 
-![YourKit](https://www.yourkit.com/images/yklogo.png)
+The output jar will be in `libs/AntiCrasher-bukkit-v2.0.12.jar`.
+
+## Credits
+
+- **Original plugin
+  **: [CraftSupport](https://github.com/CraftSupport/AntiCrasher), [smashyalts](https://github.com/smashyalts/AntiCrasher),
+  RivenBytes, Skullians, RebelMythik, MachineBreaker
+- **Fork adapted for**: SkyXNetwork
+- **PacketEvents**: [retrooper](https://github.com/retrooper/packetevents)
+
+## License
+
+This project retains the license of the original repository.

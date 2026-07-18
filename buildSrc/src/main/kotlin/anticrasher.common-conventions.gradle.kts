@@ -15,6 +15,10 @@ val libs = the<LibrariesForLibs>()
 repositories {
     mavenCentral()
     maven {
+        name = "codemc-releases"
+        url = uri("https://repo.codemc.io/repository/maven-releases/")
+    }
+    maven {
         name = "codemc-snapshots"
         url = uri("https://repo.codemc.io/repository/maven-snapshots/")
     }
