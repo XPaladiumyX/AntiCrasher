@@ -34,11 +34,20 @@ dependencies {
     compileOnly(libs.bundles.cloud.paper)
 
     api(project(":common"))
-    compileOnly(libs.packetevents.spigot)
+    implementation(libs.packetevents.spigot)
+    implementation(libs.bstats.bukkit)
     implementation(libs.multilib)
 }
 
 tasks {
+    shadowJar {
+        from(project.layout.projectDirectory.file("src/main/resources/plugin.yml")) {
+            filesMatching("plugin.yml") {
+                expand(mapOf("version" to rootProject.version.toString()))
+            }
+        }
+    }
+
     runServer {
         minecraftVersion("26.1.2")
 

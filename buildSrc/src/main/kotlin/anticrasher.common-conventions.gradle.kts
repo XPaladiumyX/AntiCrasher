@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.gson)
-    compileOnly(libs.packetevents.api)
+    implementation(libs.packetevents.api)
     api(libs.bundles.adventure)
 
     compileOnly(libs.lombok)
@@ -69,11 +69,14 @@ tasks {
         exclude(
             "**/*.kotlin_metadata",
             "**/*.kotlin_builtins",
-            "META-INF/",
+            "META-INF/*.SF",
+            "META-INF/*.DSA",
+            "META-INF/*.RSA",
+            "META-INF/MANIFEST.MF",
             "kotlin/**",
         )
 
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
         relocate("com.github.retrooper.packetevents", "net.craftsupport.anticrasher.packetevents.api")
         relocate("io.github.retrooper.packetevents", "net.craftsupport.anticrasher.packetevents.impl")

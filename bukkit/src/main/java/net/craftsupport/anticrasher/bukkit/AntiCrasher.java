@@ -1,10 +1,12 @@
 package net.craftsupport.anticrasher.bukkit;
 
 import com.github.puregero.multilib.MultiLib;
+import com.github.retrooper.packetevents.PacketEvents;
 import info.preva1l.trashcan.Version;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.skullian.zenith.core.flavor.Flavor;
 import net.skullian.zenith.core.flavor.FlavorOptions;
-import io.github.retrooper.packetevents.bstats.bukkit.Metrics;
+import org.bstats.bukkit.Metrics;
 import lombok.Getter;
 import net.craftsupport.anticrasher.api.AntiCrasherAPI;
 import net.craftsupport.anticrasher.api.Platform;
@@ -46,11 +48,21 @@ public class AntiCrasher extends JavaPlugin implements Platform {
                         this.getClass().getPackageName()
                 )
         );
+
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().getSettings()
+                .reEncodeByDefault(false)
+                .checkForUpdates(true)
+                .bStats(false)
+                .kickOnPacketException(true);
+
+        PacketEvents.getAPI().load();
     }
 
     @Override
     public void onEnable() {
         ACLogger.info("Enabling AntiCrasher...");
+        PacketEvents.getAPI().init();
         AntiCrasherAPI.setInstance(new BukkitAntiCrasherAPI());
 
         ACLogger.info("Initialising Metrics.");
@@ -67,6 +79,9 @@ public class AntiCrasher extends JavaPlugin implements Platform {
     @Override
     public void onDisable() {
         flavor.close();
+
+        PacketEvents.getAPI().terminate();
+
         ACLogger.info("AntiCrasher has disabled.");
     }
 
